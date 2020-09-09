@@ -3,17 +3,17 @@ using System.Threading.Tasks;
 
 namespace Generator
 {
-    public class Generator
+    public class Generator : IGenerator
     {
         public async Task Generate(string filePath, int rowCount)
         {
-            await using var fs = File.CreateText(filePath);
+            await using var writer = File.CreateText(filePath);
 
             var rowGenerator = new RowGenerator();
             for (var i = 0; i < rowCount; i++)
             {
                 var row = rowGenerator.Generate();
-                await fs.WriteLineAsync(row.ToString());
+                await writer.WriteLineAsync(row.ToString());
             }
         }
     }

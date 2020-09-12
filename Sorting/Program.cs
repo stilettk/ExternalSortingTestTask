@@ -26,7 +26,7 @@ namespace Sorting
         private static ISorter GetSorter()
         {
             var sortingStrategy = new DefaultSortingStrategy<Row>();
-            var sorter = new Sorter(sortingStrategy);
+            var sorter = new SimpleSorter(sortingStrategy);
             return sorter;
         }
     }

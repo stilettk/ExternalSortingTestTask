@@ -6,11 +6,11 @@ using Sorting.SortingStrategy;
 
 namespace Sorting.Sorters
 {
-    public class Sorter : ISorter
+    public class SimpleSorter : ISorter
     {
         private readonly ISortingStrategy<Row> _sortingStrategy;
 
-        public Sorter(ISortingStrategy<Row> sortingStrategy)
+        public SimpleSorter(ISortingStrategy<Row> sortingStrategy)
         {
             _sortingStrategy = sortingStrategy;
         }

@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorting", "Sorting\Sorting.csproj", "{BCD04D37-7CFB-4A05-B0F4-8724C48C306E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sorting.Tests", "Sorting.Tests\Sorting.Tests.csproj", "{0CB7A939-D419-4BE2-9196-1E196A23EAA5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{BCD04D37-7CFB-4A05-B0F4-8724C48C306E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BCD04D37-7CFB-4A05-B0F4-8724C48C306E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BCD04D37-7CFB-4A05-B0F4-8724C48C306E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CB7A939-D419-4BE2-9196-1E196A23EAA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CB7A939-D419-4BE2-9196-1E196A23EAA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CB7A939-D419-4BE2-9196-1E196A23EAA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CB7A939-D419-4BE2-9196-1E196A23EAA5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

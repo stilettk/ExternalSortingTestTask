@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Generation
+namespace Generation.Generator
 {
     public class ParallelGenerator : IGenerator
     {
@@ -23,6 +23,7 @@ namespace Generation
                 .Select(_ => Guid.NewGuid().ToString())
                 .ToList();
 
+            // TODO the amount of generated rows won't always equal to rowCount
             var generateTasks = tempFileNames.Select(tempFile =>
                 _innerGenerator.Generate(tempFile, rowCount / MaxDegreeOfParallelism));
             await Task.WhenAll(generateTasks);

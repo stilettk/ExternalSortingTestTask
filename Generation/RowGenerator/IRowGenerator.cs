@@ -1,6 +1,6 @@
 ﻿using Domain;
 
-namespace Generation
+namespace Generation.RowGenerator
 {
     public interface IRowGenerator
     {

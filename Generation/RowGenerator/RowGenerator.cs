@@ -2,7 +2,7 @@
 using System.IO;
 using Domain;
 
-namespace Generation
+namespace Generation.RowGenerator
 {
     public class RowGenerator : IRowGenerator
     {

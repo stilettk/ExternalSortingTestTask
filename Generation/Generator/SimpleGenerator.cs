@@ -1,13 +1,14 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using Generation.RowGenerator;
 
-namespace Generation
+namespace Generation.Generator
 {
-    public class Generator : IGenerator
+    public class SimpleGenerator : IGenerator
     {
         private readonly IRowGenerator _rowGenerator;
 
-        public Generator(IRowGenerator rowGenerator)
+        public SimpleGenerator(IRowGenerator rowGenerator)
         {
             _rowGenerator = rowGenerator;
         }

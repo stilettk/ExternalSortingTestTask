@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
-using Sorting.Sorter;
+using Domain;
+using Sorting.Sorters;
+using Sorting.SortingStrategy;
 
 namespace Sorting
 {
@@ -15,11 +16,18 @@ namespace Sorting
 
             var sw = new Stopwatch();
             sw.Start();
-            
-            var sorter = new SimpleSorter();
-            await sorter.Sort(sourcePath, destPath);
-            
+
+            var sorter = GetSorter();
+            await sorter.SortAsync(sourcePath, destPath);
+
             Console.WriteLine($"Finished in {sw.Elapsed}.");
+        }
+
+        private static ISorter GetSorter()
+        {
+            var sortingStrategy = new DefaultSortingStrategy<Row>();
+            var sorter = new Sorter(sortingStrategy);
+            return sorter;
         }
     }
 }

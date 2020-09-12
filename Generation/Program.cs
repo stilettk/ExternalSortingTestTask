@@ -10,17 +10,17 @@ namespace Generation
     {
         static async Task Main(string[] args)
         {
-            const string filePath = "generated.txt";
-            
-            Console.WriteLine($"Generating {filePath}...");
-            
-            var sw = new Stopwatch();
-            sw.Start();
-            
+            var filePath = args.Length > 0 ? args[0] : "generated.txt";
+
             IRowGenerator rowGenerator = new RowGenerator.RowGenerator();
             var generator = new ParallelGenerator(new SimpleGenerator(rowGenerator));
-            await generator.Generate("generated.txt", 100000000);
-            
+
+
+            Console.WriteLine($"Generating {filePath}...");
+            var sw = Stopwatch.StartNew();
+
+            await generator.Generate("generated.txt", 10);
+
             Console.WriteLine($"Finished in {sw.Elapsed}.");
         }
     }

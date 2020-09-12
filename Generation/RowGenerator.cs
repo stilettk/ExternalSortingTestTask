@@ -2,9 +2,9 @@
 using System.IO;
 using Domain;
 
-namespace Generator
+namespace Generation
 {
-    public class RowGenerator
+    public class RowGenerator : IRowGenerator
     {
         private readonly Random _random = new Random();
 

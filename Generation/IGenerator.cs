@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Generator
+namespace Generation
 {
     public interface IGenerator
     {

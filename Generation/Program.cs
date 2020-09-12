@@ -2,9 +2,9 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace Generator
+namespace Generation
 {
-    class Program
+    public class Program
     {
         static async Task Main(string[] args)
         {
@@ -15,7 +15,8 @@ namespace Generator
             var sw = new Stopwatch();
             sw.Start();
             
-            var generator = new ParallelGenerator(new Generator());
+            IRowGenerator rowGenerator = new RowGenerator();
+            var generator = new ParallelGenerator(new Generator(rowGenerator));
             await generator.Generate("generated.txt", 100000000);
             
             Console.WriteLine($"Finished in {sw.Elapsed}.");

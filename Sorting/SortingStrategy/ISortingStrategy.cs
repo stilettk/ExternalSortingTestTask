@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 
 namespace Sorting.SortingStrategy
 {
-    public interface ISortingStrategy<T> where T : IComparable
+    public interface ISortingStrategy
     {
-        IEnumerable<T> Sort(IEnumerable<T> collection);
+        IEnumerable<string> Sort(IEnumerable<string> collection);
     }
 }

@@ -12,16 +12,20 @@ namespace Generation
         {
             var filePath = args.Length > 0 ? args[0] : "generated.txt";
 
-            IRowGenerator rowGenerator = new RowGenerator.RowGenerator();
-            var generator = new ParallelGenerator(new SimpleGenerator(rowGenerator));
-
-
             Console.WriteLine($"Generating {filePath}...");
             var sw = Stopwatch.StartNew();
 
-            await generator.Generate("generated.txt", 10);
+            var generator = GetGenerator();
+            await generator.GenerateAsync("generated.txt", 10);
 
             Console.WriteLine($"Finished in {sw.Elapsed}.");
+        }
+
+        private static IGenerator GetGenerator()
+        {
+            IRowGenerator rowGenerator = new RowGenerator.RowGenerator();
+            var generator = new ParallelGenerator(new SimpleGenerator(rowGenerator));
+            return generator;
         }
     }
 }

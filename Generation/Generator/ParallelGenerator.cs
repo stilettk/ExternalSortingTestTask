@@ -17,7 +17,7 @@ namespace Generation.Generator
             _innerGenerator = innerGenerator;
         }
 
-        public async Task Generate(string filePath, int rowCount)
+        public async Task GenerateAsync(string filePath, int rowCount)
         {
             var tempFileNames = Enumerable.Range(0, MaxDegreeOfParallelism)
                 .Select(_ => Guid.NewGuid().ToString())
@@ -25,7 +25,7 @@ namespace Generation.Generator
 
             // TODO the amount of generated rows won't always equal to rowCount
             var generateTasks = tempFileNames.Select(tempFile =>
-                _innerGenerator.Generate(tempFile, rowCount / MaxDegreeOfParallelism));
+                _innerGenerator.GenerateAsync(tempFile, rowCount / MaxDegreeOfParallelism));
             await Task.WhenAll(generateTasks);
 
             await CombineFiles(tempFileNames, filePath);

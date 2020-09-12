@@ -4,6 +4,6 @@ namespace Generation.Generator
 {
     public interface IGenerator
     {
-        Task Generate(string filePath, int rowCount);
+        Task GenerateAsync(string filePath, int rowCount);
     }
 }

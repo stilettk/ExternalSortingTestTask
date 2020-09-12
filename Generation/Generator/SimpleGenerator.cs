@@ -13,7 +13,7 @@ namespace Generation.Generator
             _rowGenerator = rowGenerator;
         }
 
-        public async Task Generate(string filePath, int rowCount)
+        public async Task GenerateAsync(string filePath, int rowCount)
         {
             await using var writer = File.CreateText(filePath);
 

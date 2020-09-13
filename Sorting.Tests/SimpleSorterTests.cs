@@ -27,6 +27,7 @@ namespace Sorting.Tests
         [TestCase(new[] {"2. a", "2. b", "1. a", "1. b"}, new[] {"1. a", "2. a", "1. b", "2. b"})]
         [TestCase(new[] {"1. b", "1. b", "1. a", "1. a"}, new[] {"1. a", "1. a", "1. b", "1. b"})]
         [TestCase(new[] {"1. a", "1. a", "2. b"}, new[] {"1. a", "1. a", "2. b"})]
+        [TestCase(new[] {"10. a", "1. a"}, new[] {"1. a", "10. a"})]
         [Test]
         public async Task WhenSort_ShouldSortCorrectly(string[] input, string[] expected)
         {

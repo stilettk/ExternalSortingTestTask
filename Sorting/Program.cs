@@ -11,7 +11,7 @@ namespace Sorting
     class Program
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        
+
         static async Task Main(string[] args)
         {
             try
@@ -36,7 +36,8 @@ namespace Sorting
         private static ISorter GetSorter()
         {
             var sortingStrategy = new HPCMergeSortingStrategy();
-            var sorter = new ExternalSorter(sortingStrategy);
+            var sorter = new ExternalSorter(sortingStrategy,
+                new ExternalSorterOptions {ChunkSizeBytes = 64 * 1024 * 1024});
             return sorter;
         }
     }

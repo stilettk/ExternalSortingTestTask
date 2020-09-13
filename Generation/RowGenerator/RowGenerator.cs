@@ -10,6 +10,6 @@ namespace Generation.RowGenerator
 
         public Row Generate() => new Row(_random.Next(), GenerateRandomString());
 
-        private static string GenerateRandomString() => Path.GetRandomFileName().Replace('.', ' ');
+        private string GenerateRandomString() => Guid.NewGuid().ToString();
     }
 }

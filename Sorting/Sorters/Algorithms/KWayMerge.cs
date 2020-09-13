@@ -16,10 +16,13 @@ namespace Sorting.Sorters.Algorithms
 
             public ChunkReader(string chunkPath, int? bufferSize)
             {
+                Path = chunkPath;
                 _reader = new StreamReader(chunkPath, Encoding.Default, true, bufferSize ?? -1);
             }
 
-            public async Task<string> PeekAsync() => _headRow ??= await _reader.ReadLineAsync();
+            public string Path { get; }
+
+            public async Task<string> PeekAsync() => _headRow ??= await _reader.ReadLineAsync().ConfigureAwait(false);
 
             public async Task<string> PopAsync()
             {
@@ -37,39 +40,47 @@ namespace Sorting.Sorters.Algorithms
         public static async Task ExecuteAsync(
             IEnumerable<string> chunkPaths,
             string destPath,
-            IComparer<string> comparer, int? bufferSize)
+            IComparer<string> comparer,
+            int? bufferSize)
         {
             await using var destWriter = File.CreateText(destPath);
 
-            var chunkReaders = chunkPaths.ToDictionary(
-                x => x, path => new ChunkReader(path, bufferSize));
-            while (chunkReaders.Count > 0)
+            var chunkReaders = chunkPaths
+                .Select(path => new ChunkReader(path, bufferSize))
+                .ToList();
+
+            while (true)
             {
-                ChunkReader minChunk = null;
-                foreach (var (chunkPath, reader) in chunkReaders)
-                {
-                    var row = await reader.PeekAsync();
-                    if (row == null)
-                    {
-                        reader.Dispose();
-                        chunkReaders.Remove(chunkPath);
-                        File.Delete(chunkPath);
-                        continue;
-                    }
+                var minChunk = await GetChunkWithMinValue(chunkReaders, comparer);
+                if (minChunk == null) break;
 
-                    if (minChunk == null || comparer.Compare(row, await minChunk.PeekAsync()) < 0)
-                    {
-                        minChunk = reader;
-                    }
-                }
+                var minRow = await minChunk.PopAsync();
+                var newLine = minRow + (chunkReaders.Count > 0 ? Environment.NewLine : "");
+                await destWriter.WriteAsync(newLine);
+            }
 
-                if (minChunk != null)
+            foreach (var reader in chunkReaders)
+            {
+                reader.Dispose();
+                File.Delete(reader.Path);
+            }
+        }
+
+        private static async Task<ChunkReader> GetChunkWithMinValue(
+            IEnumerable<ChunkReader> chunkReaders,
+            IComparer<string> comparer)
+        {
+            ChunkReader minChunk = null;
+            foreach (var reader in chunkReaders)
+            {
+                var row = await reader.PeekAsync();
+                if (row != null && (minChunk == null || comparer.Compare(row, await minChunk.PeekAsync()) < 0))
                 {
-                    var minRow = await minChunk.PopAsync();
-                    var newLine = minRow + (chunkReaders.Count > 0 ? Environment.NewLine : "");
-                    await destWriter.WriteAsync(newLine);
+                    minChunk = reader;
                 }
             }
+
+            return minChunk;
         }
     }
 }

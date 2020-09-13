@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Generation.RowGenerator;
 
@@ -13,14 +15,22 @@ namespace Generation.Generator
             _rowGenerator = rowGenerator;
         }
 
-        public async Task GenerateAsync(string filePath, int rowCount)
+        public async Task GenerateAsync(string filePath, long maxBytes)
         {
-            await using var writer = File.CreateText(filePath);
+            await File.WriteAllLinesAsync(filePath, GenerateLines(maxBytes));
+        }
 
-            for (var i = 0; i < rowCount; i++)
+        private IEnumerable<string> GenerateLines(long maxBytes)
+        {
+            long bytesGenerated = 0;
+            while (bytesGenerated < maxBytes)
             {
-                var row = _rowGenerator.Generate();
-                await writer.WriteLineAsync(row.ToString());
+                var row = _rowGenerator.Generate().ToString();
+
+                var bytes = Encoding.Default.GetByteCount(row);
+                bytesGenerated += bytes;
+
+                yield return row;
             }
         }
     }

@@ -34,6 +34,7 @@ namespace Sorting.Tests
                 yield return new[] {"2. a", "2. b", "1. a", "1. b"};
                 yield return new[] {"1. b", "1. b", "1. a", "1. a"};
                 yield return new[] {"1. a", "1. a", "2. b"};
+                yield return new[] {"10. a", "1. a", "2. b"};
                 yield return Enumerable.Range(0, 1000)
                     .Select(i => new Row(i, i.ToString()).ToString())
                     .ToArray();

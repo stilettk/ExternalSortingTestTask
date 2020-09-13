@@ -23,10 +23,5 @@ namespace Sorting.Sorters.External
         {
             return Marshal.SizeOf(row);
         }
-
-        private static int GetStringSize(string currentLine)
-        {
-            return Encoding.Default.GetByteCount(currentLine);
-        }
     }
 }

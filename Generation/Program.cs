@@ -3,22 +3,25 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Generation.Generator;
 using Generation.RowGenerator;
+using NLog;
 
 namespace Generation
 {
     public class Program
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        
         static async Task Main(string[] args)
         {
             var filePath = args.Length > 0 ? args[0] : "generated.txt";
 
-            Console.WriteLine($"Generating {filePath}...");
+            Logger.Info($"Generating {filePath}...");
             var sw = Stopwatch.StartNew();
 
             var generator = GetGenerator();
-            await generator.GenerateAsync("generated.txt", 100000000);
+            await generator.GenerateAsync("generated.txt", (long)(1024 * 1024 * 1024));
 
-            Console.WriteLine($"Finished in {sw.Elapsed}.");
+            Logger.Info($"Finished in {sw.Elapsed}.");
         }
 
         private static IGenerator GetGenerator()

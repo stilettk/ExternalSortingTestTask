@@ -18,22 +18,28 @@ namespace Generation.Generator
             _innerGenerator = innerGenerator;
         }
 
-        public async Task GenerateAsync(string filePath, int rowCount)
+        public async Task GenerateAsync(string filePath, long maxBytes)
         {
+            File.Delete(filePath);
+            
             var tempFileNames = Enumerable.Range(0, MaxDegreeOfParallelism)
                 .Select(_ => Guid.NewGuid().ToString())
                 .ToList();
 
-            // TODO the amount of generated rows won't always equal to rowCount
-            var generateTasks = tempFileNames.Select(async tempFile =>
+            var generateTasks = tempFileNames.Select(ProcessTempFile(filePath, maxBytes));
+            await Task.WhenAll(generateTasks);
+        }
+
+        private Func<string, Task> ProcessTempFile(string filePath, long maxBytes)
+        {
+            return async tempFile =>
             {
-                await _innerGenerator.GenerateAsync(tempFile, rowCount / MaxDegreeOfParallelism);
+                await _innerGenerator.GenerateAsync(tempFile, maxBytes / MaxDegreeOfParallelism);
                 Console.WriteLine($"Generated temp file {tempFile}");
 
                 await CombineFilesAsync(tempFile, filePath);
-                Console.WriteLine($"Combined {tempFile} into ${filePath}");
-            });
-            await Task.WhenAll(generateTasks);
+                Console.WriteLine($"Combined {tempFile} into {filePath}");
+            };
         }
 
         private async Task CombineFilesAsync(string tempFile, string destinationFile)

@@ -3,50 +3,25 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Domain;
 using NLog;
 using Sorting.Sorters.Algorithms;
 using Sorting.SortingStrategy;
 
-namespace Sorting.Sorters
+namespace Sorting.Sorters.External
 {
     public class ExternalSorterOptions
     {
         public int? ChunkSizeBytes { get; set; }
     }
 
-    public class Chunk
-    {
-        private readonly LinkedList<Row> _items = new LinkedList<Row>();
-        
-        public IReadOnlyCollection<Row> Items => _items;
-        
-        public int Size { get; private set; }
-
-        public void Add(Row row)
-        {
-            _items.AddLast(row);
-            Size += GetRowSize(row);
-        }
-
-        private static int GetRowSize(Row row)
-        {
-            return Marshal.SizeOf(row);
-        }
-
-        private static int GetStringSize(string currentLine)
-        {
-            return Encoding.Default.GetByteCount(currentLine);
-        }
-    }
-
     public class ExternalSorter : ISorter
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        
+        private readonly SemaphoreSlim _diskSemaphore = new SemaphoreSlim(1, 1);
+
         private const int DefaultChunkSizeBytes = 128 * 1024 * 1024;
 
         private readonly ISortingStrategy<Row> _sortingStrategy;
@@ -60,11 +35,14 @@ namespace Sorting.Sorters
 
         public async Task SortAsync(string sourcePath, string destPath)
         {
+            var sw = Stopwatch.StartNew();
             var chunkPaths = await SortByChunks(sourcePath);
-            
-            Logger.Debug("Merging chunks...");
+            Logger.Debug($"Chunks created in {sw.Elapsed}.");
 
+            sw.Restart();
+            Logger.Debug("Merging chunks...");
             await MergeChunksAsync(destPath, chunkPaths);
+            Logger.Debug($"Chunks merged in {sw.Elapsed}.");
         }
 
         private async Task<ICollection<string>> SortByChunks(string sourcePath)
@@ -72,7 +50,7 @@ namespace Sorting.Sorters
             using var reader = File.OpenText(sourcePath);
 
             var chunkPaths = new LinkedList<string>();
-            // var chunkSaveTasks = new LinkedList<Task>();
+            var chunkSaveTasks = new LinkedList<Task>();
             var currentChunk = new Chunk();
             var sw = Stopwatch.StartNew();
 
@@ -95,7 +73,7 @@ namespace Sorting.Sorters
                 }
             }
 
-            // await Task.WhenAll(chunkSaveTasks);
+            await Task.WhenAll(chunkSaveTasks);
 
             return chunkPaths;
         }
@@ -110,13 +88,21 @@ namespace Sorting.Sorters
         {
             var sw = Stopwatch.StartNew();
             Logger.Debug($"Saving chunk {chunkPath} ({chunk.Items.Count} items)...");
-            
+
             var sortedChunk = _sortingStrategy.Sort(chunk.Items).ToList();
             Logger.Debug($"Chunk {chunkPath} sorted in {sw.Elapsed}.");
-            
-            sw.Restart();
-            await File.WriteAllLinesAsync(chunkPath, sortedChunk.Select(x => x.ToString()));
-            Logger.Debug($"Chunk {chunkPath} saved in {sw.Elapsed}.");
+
+            try
+            {
+                // await _diskSemaphore.WaitAsync();
+                sw.Restart();
+                await File.WriteAllLinesAsync(chunkPath, sortedChunk.Select(x => x.ToString())).ConfigureAwait(false);
+                Logger.Debug($"Chunk {chunkPath} saved in {sw.Elapsed}.");
+            }
+            finally
+            {
+                // _diskSemaphore.Release();
+            }
         }
     }
 }

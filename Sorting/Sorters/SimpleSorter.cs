@@ -8,9 +8,9 @@ namespace Sorting.Sorters
 {
     public class SimpleSorter : ISorter
     {
-        private readonly ISortingStrategy _sortingStrategy;
+        private readonly ISortingStrategy<string> _sortingStrategy;
 
-        public SimpleSorter(ISortingStrategy sortingStrategy)
+        public SimpleSorter(ISortingStrategy<string> sortingStrategy)
         {
             _sortingStrategy = sortingStrategy;
         }
@@ -18,7 +18,7 @@ namespace Sorting.Sorters
         public async Task SortAsync(string sourcePath, string destPath)
         {
             var lines = await File.ReadAllLinesAsync(sourcePath);
-            var sortedLines = _sortingStrategy.Sort(lines);
+            var sortedLines = _sortingStrategy.Sort(lines, Row.StringComparer);
             await File.WriteAllLinesAsync(destPath, sortedLines);
         }
     }

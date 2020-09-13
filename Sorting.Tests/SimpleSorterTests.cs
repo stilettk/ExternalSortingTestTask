@@ -41,7 +41,7 @@ namespace Sorting.Tests
             CollectionAssert.AreEqual(result, expected);
         }
 
-        private static ISorter GetSorter() => new SimpleSorter(new DefaultSortingStrategy());
+        private static ISorter GetSorter() => new SimpleSorter(new DefaultSortingStrategy<string>());
 
         private static string GetFilePath() => Path.Combine(DirectoryName, Guid.NewGuid().ToString());
     }

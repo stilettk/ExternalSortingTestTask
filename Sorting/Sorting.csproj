@@ -17,4 +17,15 @@
       <ProjectReference Include="..\Domain\Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="HPCsharp" Version="3.13.0" />
+      <PackageReference Include="NLog" Version="4.7.4" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="NLog.config">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

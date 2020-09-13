@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Sorting.SortingStrategy
 {
-    public interface ISortingStrategy
+    public interface ISortingStrategy<T> where T: IComparable
     {
-        IEnumerable<string> Sort(IEnumerable<string> collection);
+        IEnumerable<T> Sort(IEnumerable<T> collection, IComparer<T> comparer = null);
     }
 }

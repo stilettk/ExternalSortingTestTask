@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Sorting.Sorters.KWayMerge
+namespace Sorting.Sorters.Algorithms
 {
     public static class KWayMerge
     {
@@ -53,6 +53,7 @@ namespace Sorting.Sorters.KWayMerge
                     {
                         reader.Dispose();
                         chunkReaders.Remove(chunkPath);
+                        File.Delete(chunkPath);
                         continue;
                     }
 

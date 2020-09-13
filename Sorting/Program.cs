@@ -1,32 +1,42 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Domain;
+using NLog;
 using Sorting.Sorters;
+using Sorting.Sorters.External;
 using Sorting.SortingStrategy;
 
 namespace Sorting
 {
     class Program
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        
         static async Task Main(string[] args)
         {
-            var sourcePath = args.Length > 0 ? args[0] : "generated.txt";
-            var destPath = args.Length > 1 ? args[1] : "sorted.txt";
+            try
+            {
+                var sourcePath = args.Length > 0 ? args[0] : "generated.txt";
+                var destPath = args.Length > 1 ? args[1] : "sorted.txt";
 
-            var sw = new Stopwatch();
-            sw.Start();
+                Logger.Info($"Sorting {sourcePath}...");
+                var sw = Stopwatch.StartNew();
 
-            var sorter = GetSorter();
-            await sorter.SortAsync(sourcePath, destPath);
+                var sorter = GetSorter();
+                await sorter.SortAsync(sourcePath, destPath);
 
-            Console.WriteLine($"Finished in {sw.Elapsed}.");
+                Logger.Info($"Sorted to {destPath} in {sw.Elapsed}.");
+            }
+            catch (Exception e)
+            {
+                Logger.Error(e);
+            }
         }
 
         private static ISorter GetSorter()
         {
-            var sortingStrategy = new DefaultSortingStrategy();
-            var sorter = new SimpleSorter(sortingStrategy);
+            var sortingStrategy = new HPCMergeSortingStrategy();
+            var sorter = new ExternalSorter(sortingStrategy);
             return sorter;
         }
     }

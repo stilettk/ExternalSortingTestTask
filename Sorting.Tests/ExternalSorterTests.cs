@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Domain;
 using NUnit.Framework;
 using Sorting.Sorters;
+using Sorting.Sorters.External;
 using Sorting.SortingStrategy;
 
 namespace Sorting.Tests
@@ -62,9 +63,10 @@ namespace Sorting.Tests
             return await File.ReadAllLinesAsync(destPath);
         }
 
-        private static ISorter GetSimpleSorter() => new SimpleSorter(new DefaultSortingStrategy());
+        private static ISorter GetSimpleSorter() => new SimpleSorter(new DefaultSortingStrategy<string>());
 
-        private static ISorter GetExternalSorter() => new ExternalSorter(new DefaultSortingStrategy(),
+        private static ISorter GetExternalSorter() => new ExternalSorter(
+            new HPCMergeSortingStrategy(),
             new ExternalSorterOptions {ChunkSizeBytes = 1});
 
         private static string GetFilePath() => Path.Combine(DirectoryName, Guid.NewGuid().ToString());

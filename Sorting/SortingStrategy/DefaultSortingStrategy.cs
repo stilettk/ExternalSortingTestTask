@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Domain;
 
 namespace Sorting.SortingStrategy
 {
-    public class DefaultSortingStrategy : ISortingStrategy
+    public class DefaultSortingStrategy<T> : ISortingStrategy<T> where T : IComparable
     {
-        public IEnumerable<string> Sort(IEnumerable<string> collection)
+        public IEnumerable<T> Sort(IEnumerable<T> collection, IComparer<T> comparer = null)
         {
-            return collection
-                .Select(Row.From)
-                .OrderBy(x => x)
-                .Select(x => x.ToString());
+            return collection.AsParallel().OrderBy(x => x, comparer);
         }
     }
 }

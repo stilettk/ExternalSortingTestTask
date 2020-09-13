@@ -1,6 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using Domain;
 using NUnit.Framework;
 using Sorting.Sorters;
 using Sorting.SortingStrategy;
@@ -23,11 +26,22 @@ namespace Sorting.Tests
             Directory.Delete(DirectoryName, true);
         }
 
-        [TestCase("2. a", "2. b", "1. a", "1. b")]
-        [TestCase("1. b", "1. b", "1. a", "1. a")]
-        [TestCase("1. a", "1. a", "2. b")]
+        public static IEnumerable<string[]> ExternalSorterTestCases
+        {
+            get
+            {
+                yield return new[] {"2. a", "2. b", "1. a", "1. b"};
+                yield return new[] {"1. b", "1. b", "1. a", "1. a"};
+                yield return new[] {"1. a", "1. a", "2. b"};
+                yield return Enumerable.Range(0, 1000)
+                    .Select(i => new Row(i, i.ToString()).ToString())
+                    .ToArray();
+            }
+        }
+
+        [TestCaseSource(nameof(ExternalSorterTestCases))]
         [Test]
-        public async Task ShouldEqualToDefaultSorter(params string[] input)
+        public async Task ShouldEqualToDefaultSorter(string[] input)
         {
             var sourcePath = GetFilePath();
             await File.WriteAllLinesAsync(sourcePath, input);

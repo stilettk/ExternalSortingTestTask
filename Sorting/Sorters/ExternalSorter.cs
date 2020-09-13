@@ -4,78 +4,94 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain;
 using Sorting.SortingStrategy;
 
 namespace Sorting.Sorters
 {
     public class ExternalSorterOptions
     {
-        public int ChunkSizeBytes { get; set; }
+        public int? ChunkSizeBytes { get; set; }
     }
 
-    public class ExternalSorter : ISorter
+    public class Chunk
     {
-        private readonly ISortingStrategy _sortingStrategy;
-        private readonly ExternalSorterOptions _options;
+        private readonly LinkedList<string> _items = new LinkedList<string>();
+        
+        public IEnumerable<string> Items => _items.AsEnumerable();
+        
+        public int Size { get; private set; }
 
-        private readonly ExternalSorterOptions _defaultOptions = new ExternalSorterOptions
+        public void Add(string line)
         {
-            ChunkSizeBytes = 128 * 1024 * 1024
-        };
-
-        public ExternalSorter(ISortingStrategy sortingStrategy, ExternalSorterOptions options = null)
-        {
-            _sortingStrategy = sortingStrategy;
-            _options = options ?? _defaultOptions;
-        }
-
-        public async Task SortAsync(string sourcePath, string destPath)
-        {
-            using var reader = File.OpenText(sourcePath);
-
-            var chunkPaths = new LinkedList<string>();
-            LinkedList<string> currentChunk = null;
-            var currentChunkSize = 0;
-
-            string currentLine;
-            while ((currentLine = await reader.ReadLineAsync()) != null)
-            {
-                if (currentChunk == null)
-                {
-                    currentChunk = new LinkedList<string>();
-                    currentChunkSize = 0;
-                }
-
-                currentChunk.AddLast(currentLine);
-                currentChunkSize += GetStringSize(currentLine);
-
-                if (currentChunkSize >= _options.ChunkSizeBytes)
-                {
-                    var chunkPath = "chunk" + Guid.NewGuid();
-                    chunkPaths.AddLast(chunkPath);
-                    await SaveChunk(currentChunk, chunkPath);
-                    currentChunk = null;
-                }
-            }
-
-            await MergeChunksAsync(chunkPaths, destPath);
-        }
-
-        private async Task SaveChunk(IEnumerable<string> currentChunk, string chunkPath)
-        {
-            var sortedChunk = _sortingStrategy.Sort(currentChunk);
-            await File.WriteAllLinesAsync(chunkPath, sortedChunk);
-        }
-
-        private async Task MergeChunksAsync(IReadOnlyCollection<string> chunkPaths, string destPath)
-        {
-            var allLines = chunkPaths.SelectMany(File.ReadAllLines);
-            await File.WriteAllLinesAsync(destPath, _sortingStrategy.Sort(allLines));
+            _items.AddLast(line);
+            Size += GetStringSize(line);
         }
 
         private static int GetStringSize(string currentLine)
         {
             return Encoding.Default.GetByteCount(currentLine);
+        }
+    }
+
+    public class ExternalSorter : ISorter
+    {
+        private const int DefaultChunkSizeBytes = 128 * 1024 * 1024;
+
+        private readonly ISortingStrategy _sortingStrategy;
+        private readonly int _chunkSizeBytes;
+
+        public ExternalSorter(
+            ISortingStrategy sortingStrategy,
+            ExternalSorterOptions options = null)
+        {
+            _sortingStrategy = sortingStrategy;
+            _chunkSizeBytes = options?.ChunkSizeBytes ?? DefaultChunkSizeBytes;
+        }
+
+        public async Task SortAsync(string sourcePath, string destPath)
+        {
+            var chunkPaths = await SortByChunks(sourcePath);
+
+            await MergeChunksAsync(destPath, chunkPaths);
+        }
+
+        private async Task<ICollection<string>> SortByChunks(string sourcePath)
+        {
+            using var reader = File.OpenText(sourcePath);
+
+            var chunkPaths = new LinkedList<string>();
+            var currentChunk = new Chunk();
+
+            string currentLine;
+            while ((currentLine = await reader.ReadLineAsync()) != null)
+            {
+                currentChunk.Add(currentLine);
+
+                if (currentChunk.Size >= _chunkSizeBytes)
+                {
+                    var chunkPath = "chunk" + Guid.NewGuid();
+                    chunkPaths.AddLast(chunkPath);
+
+                    await SaveChunk(currentChunk, chunkPath);
+
+                    currentChunk = new Chunk();
+                }
+            }
+
+            return chunkPaths;
+        }
+
+        private async Task MergeChunksAsync(string destPath, ICollection<string> chunkPaths)
+        {
+            var bufferSize = Math.Max(4096, _chunkSizeBytes / chunkPaths.Count);
+            await KWayMerge.KWayMerge.ExecuteAsync(chunkPaths, destPath, Row.StringComparer, bufferSize);
+        }
+
+        private async Task SaveChunk(Chunk chunk, string chunkPath)
+        {
+            var sortedChunk = _sortingStrategy.Sort(chunk.Items);
+            await File.WriteAllLinesAsync(chunkPath, sortedChunk);
         }
     }
 }

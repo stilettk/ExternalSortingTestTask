@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Domain
 {
@@ -27,6 +28,8 @@ namespace Domain
 
         public override string ToString() => $"{Number}. {String}";
 
+        public static RowStringComparer StringComparer => new RowStringComparer();
+        
         #region IComparable
 
         public int CompareTo(Row other)

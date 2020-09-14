@@ -3,11 +3,14 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog;
 
 namespace Generation.Generator
 {
     public class ParallelGenerator : IGenerator
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        
         private static readonly int MaxDegreeOfParallelism = Environment.ProcessorCount;
         private readonly SemaphoreSlim _fileSemaphore = new SemaphoreSlim(1, 1);
 
@@ -35,10 +38,10 @@ namespace Generation.Generator
             return async tempFile =>
             {
                 await _innerGenerator.GenerateAsync(tempFile, maxBytes / MaxDegreeOfParallelism);
-                Console.WriteLine($"Generated temp file {tempFile}");
+                Logger.Debug($"Generated temp file {tempFile}");
 
                 await CombineFilesAsync(tempFile, filePath);
-                Console.WriteLine($"Combined {tempFile} into {filePath}");
+                Logger.Debug($"Combined {tempFile} into {filePath}");
             };
         }
 

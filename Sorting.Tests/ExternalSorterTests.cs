@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Threading.Tasks;
 using Domain;
+using Generation.Generator;
+using Generation.RowGenerator;
 using NUnit.Framework;
 using Sorting.Sorters;
 using Sorting.Sorters.External;
@@ -57,18 +60,36 @@ namespace Sorting.Tests
             CollectionAssert.AreEqual(simpleSorterTask.Result, externalSorterTask.Result);
         }
 
+        [Test]
+        public async Task ShouldGenerateSameFileLengthAsGenerator()
+        {
+            var sourcePath = GetFilePath();
+            var generator = GetGenerator();
+            await generator.GenerateAsync(sourcePath, 10 * 1024);
+            
+            var destPath = GetFilePath();
+            var sorter = GetExternalSorter(4096);
+            await sorter.SortAsync(sourcePath, destPath);
+
+            var sourceFileSize = new FileInfo(sourcePath).Length;
+            var destFileSize = new FileInfo(destPath).Length;
+            Assert.AreEqual(sourceFileSize, destFileSize);
+        }
+
         private static async Task<string[]> SortWith(ISorter sorter, string sourcePath)
         {
             var destPath = GetFilePath();
             await sorter.SortAsync(sourcePath, destPath);
             return await File.ReadAllLinesAsync(destPath);
         }
+        
+        private static IGenerator GetGenerator() => new ParallelGenerator(new SimpleGenerator(new RowGenerator()));
 
         private static ISorter GetSimpleSorter() => new SimpleSorter(new DefaultSortingStrategy<string>());
 
-        private static ISorter GetExternalSorter() => new ExternalSorter(
+        private static ISorter GetExternalSorter(int? chunkSizeBytes = 1) => new ExternalSorter(
             new HPCMergeSortingStrategy(),
-            new ExternalSorterOptions {ChunkSizeBytes = 1});
+            new ExternalSorterOptions {ChunkSizeBytes = chunkSizeBytes});
 
         private static string GetFilePath() => Path.Combine(DirectoryName, Guid.NewGuid().ToString());
     }

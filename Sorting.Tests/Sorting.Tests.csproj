@@ -13,6 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Generation\Generation.csproj" />
       <ProjectReference Include="..\Sorting\Sorting.csproj" />
     </ItemGroup>
 

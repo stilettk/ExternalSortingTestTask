@@ -36,8 +36,7 @@ namespace Sorting
         private static ISorter GetSorter()
         {
             var sortingStrategy = new HPCMergeSortingStrategy();
-            var sorter = new ExternalSorter(sortingStrategy,
-                new ExternalSorterOptions {ChunkSizeBytes = 64 * 1024 * 1024});
+            var sorter = new ExternalSorter(sortingStrategy);
             return sorter;
         }
     }

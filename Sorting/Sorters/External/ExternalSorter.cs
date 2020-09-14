@@ -20,7 +20,6 @@ namespace Sorting.Sorters.External
     public class ExternalSorter : ISorter
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
-        private readonly SemaphoreSlim _diskSemaphore = new SemaphoreSlim(1, 1);
 
         private const int DefaultChunkSizeBytes = 128 * 1024 * 1024;
 
@@ -54,11 +53,17 @@ namespace Sorting.Sorters.External
             var currentChunk = new Chunk();
             var sw = Stopwatch.StartNew();
 
-            foreach (var currentLine in File.ReadLines(sourcePath))
+            using var fs = File.OpenText(sourcePath);
+            while (true)
             {
-                currentChunk.Add(Row.From(currentLine));
+                var currentLine = await fs.ReadLineAsync();
 
-                if (currentChunk.Size >= _chunkSizeBytes)
+                if (currentLine != null)
+                {
+                    currentChunk.Add(Row.From(currentLine));
+                }
+
+                if (currentLine == null || currentChunk.Size >= _chunkSizeBytes)
                 {
                     var chunkPath = "chunk" + Guid.NewGuid();
                     chunkPaths.AddLast(chunkPath);
@@ -71,6 +76,8 @@ namespace Sorting.Sorters.External
                     currentChunk = new Chunk();
                     sw.Restart();
                 }
+
+                if (currentLine == null) break;
             }
 
             await Task.WhenAll(chunkSaveTasks);
@@ -92,17 +99,9 @@ namespace Sorting.Sorters.External
             var sortedChunk = _sortingStrategy.Sort(chunk.Items).ToList();
             Logger.Debug($"Chunk {chunkPath} sorted in {sw.Elapsed}.");
 
-            try
-            {
-                // await _diskSemaphore.WaitAsync();
-                sw.Restart();
-                await File.WriteAllLinesAsync(chunkPath, sortedChunk.Select(x => x.ToString())).ConfigureAwait(false);
-                Logger.Debug($"Chunk {chunkPath} saved in {sw.Elapsed}.");
-            }
-            finally
-            {
-                // _diskSemaphore.Release();
-            }
+            sw.Restart();
+            await File.WriteAllLinesAsync(chunkPath, sortedChunk.Select(x => x.ToString())).ConfigureAwait(false);
+            Logger.Debug($"Chunk {chunkPath} saved in {sw.Elapsed}.");
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Domain;
 using NLog;
-using Sorting.Sorters.Algorithms;
+using Sorting.Sorters.Algorithms.KWayMerge;
 using Sorting.SortingStrategy;
 
 namespace Sorting.Sorters.External
@@ -63,9 +63,9 @@ namespace Sorting.Sorters.External
                     var chunkPath = "chunk" + Guid.NewGuid();
                     chunkPaths.AddLast(chunkPath);
 
-                    await SaveChunk(currentChunk, chunkPath);
+                    // await SaveChunk(currentChunk, chunkPath);
                     Logger.Debug($"Chunk processed in {sw.Elapsed}");
-                    // chunkSaveTasks.AddLast(SaveChunk(currentChunk, chunkPath));
+                    chunkSaveTasks.AddLast(SaveChunk(currentChunk, chunkPath));
 
                     Logger.Debug("Created new chunk");
                     currentChunk = new Chunk();

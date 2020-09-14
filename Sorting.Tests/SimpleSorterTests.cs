@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Domain;
 using NUnit.Framework;
 using Sorting.Sorters;
 using Sorting.SortingStrategy;

@@ -45,34 +45,37 @@ namespace Sorting.Sorters.External
 
         private async Task<ICollection<string>> SortByChunks(string sourcePath)
         {
-            var chunkPaths = new LinkedList<string>();
-            var chunkSaveTasks = new LinkedList<Task>();
-            var currentChunk = new Chunk();
+            var chunkPaths = new List<string>();
+            var chunkSaveTasks = new List<Task>();
+            Chunk currentChunk = null;
             var sw = Stopwatch.StartNew();
 
             using var fs = File.OpenText(sourcePath);
             while (true)
             {
                 var currentLine = await fs.ReadLineAsync();
-                var endOfFileReached = currentLine == null;
+                if (currentLine == null) break;
 
-                if (currentChunk.Size >= _chunkSizeBytes || endOfFileReached)
+                if (currentChunk == null)
+                {
+                    currentChunk = new Chunk();
+                    Logger.Debug("Created new chunk");
+                    sw.Restart();
+                }
+                
+                currentChunk.Add(Row.From(currentLine));
+
+                if (currentChunk.Size >= _chunkSizeBytes)
                 {
                     var chunkPath = "chunk" + Guid.NewGuid();
-                    chunkPaths.AddLast(chunkPath);
+                    chunkPaths.Add(chunkPath);
 
                     // await SaveChunk(currentChunk, chunkPath);
                     Logger.Debug($"Chunk processed in {sw.Elapsed}");
-                    chunkSaveTasks.AddLast(SortAndSaveChunk(currentChunk, chunkPath));
+                    chunkSaveTasks.Add(SortAndSaveChunk(currentChunk, chunkPath));
 
-                    Logger.Debug("Created new chunk");
-                    currentChunk = new Chunk();
-                    sw.Restart();
+                    currentChunk = null;
                 }
-
-                if (endOfFileReached) break;
-
-                currentChunk.Add(Row.From(currentLine));
             }
 
             await Task.WhenAll(chunkSaveTasks);

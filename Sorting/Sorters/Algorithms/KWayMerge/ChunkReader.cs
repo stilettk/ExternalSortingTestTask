@@ -24,10 +24,10 @@ namespace Sorting.Sorters.Algorithms.KWayMerge
 
         public string Path { get; }
 
-        public async Task<Row?> ReadAsync()
+        public Row? Read()
         {
-            var rowString = await _reader.ReadLineAsync();
-            return rowString != null ? Row.From(rowString) : (Row?) null;
+            var rowString = _reader.ReadLine();
+            return rowString != null ? new Row(rowString) : (Row?) null;
         }
 
         public void Dispose()

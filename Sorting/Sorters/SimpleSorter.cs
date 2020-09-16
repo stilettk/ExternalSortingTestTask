@@ -18,7 +18,7 @@ namespace Sorting.Sorters
         public async Task SortAsync(string sourcePath, string destPath)
         {
             var lines = await File.ReadAllLinesAsync(sourcePath);
-            var sortedLines = _sortingStrategy.Sort(lines.Select(Row.From));
+            var sortedLines = _sortingStrategy.Sort(lines.Select(x => new Row(x)));
             await File.WriteAllLinesAsync(destPath, sortedLines.Select(x => x.ToString()));
         }
     }

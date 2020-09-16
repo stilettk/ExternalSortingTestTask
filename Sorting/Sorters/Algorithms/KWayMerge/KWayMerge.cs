@@ -9,25 +9,25 @@ namespace Sorting.Sorters.Algorithms.KWayMerge
 {
     public static class KWayMerge
     {
-        public static async Task ExecuteAsync(
+        public static void Execute(
             IEnumerable<string> chunkPaths,
             string destPath,
             int? bufferSize = null)
         {
-            await using var destWriter = File.CreateText(destPath);
+            using var destWriter = File.CreateText(destPath);
 
             var chunkReaders = chunkPaths
                 .Select(path => new ChunkReader(path, bufferSize))
                 .ToDictionary(x => x.Path);
 
-            var heap = await CreateHeap(chunkReaders.Values);
+            var heap = CreateHeap(chunkReaders.Values);
             while (heap.Count > 0)
             {
                 var minRecord = heap.GetMin();
                 var newLine = minRecord.Item + (chunkReaders.Count > 0 ? Environment.NewLine : "");
-                await destWriter.WriteAsync(newLine);
+                destWriter.Write(newLine);
 
-                await FillNewRow(chunkReaders, minRecord.FilePath, heap);
+                FillNewRow(chunkReaders, minRecord.FilePath, heap);
             }
 
             foreach (var reader in chunkReaders.Values)
@@ -37,12 +37,12 @@ namespace Sorting.Sorters.Algorithms.KWayMerge
             }
         }
 
-        private static async Task<BinaryHeap<ChunkRecord>> CreateHeap(IReadOnlyCollection<ChunkReader> chunkReaders)
+        private static BinaryHeap<ChunkRecord> CreateHeap(IReadOnlyCollection<ChunkReader> chunkReaders)
         {
             var initialItems = new List<ChunkRecord>(chunkReaders.Count);
             foreach (var reader in chunkReaders)
             {
-                var row = await reader.ReadAsync();
+                var row = reader.Read();
                 if (row != null)
                 {
                     initialItems.Add(new ChunkRecord(row.Value, reader.Path));
@@ -53,13 +53,13 @@ namespace Sorting.Sorters.Algorithms.KWayMerge
             return heap;
         }
 
-        private static async Task FillNewRow(
+        private static void FillNewRow(
             IDictionary<string, ChunkReader> chunkReaders,
             string chunkPath,
             BinaryHeap<ChunkRecord> heap)
         {
             var reader = chunkReaders[chunkPath];
-            var newRow = await reader.ReadAsync();
+            var newRow = reader.Read();
             if (newRow == null)
             {
                 reader.Dispose();

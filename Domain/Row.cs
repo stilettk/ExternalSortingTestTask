@@ -4,6 +4,8 @@ namespace Domain
 {
     public readonly struct Row : IComparable<Row>, IComparable
     {
+        private readonly string _string;
+        
         public int Number { get; }
         public string String { get; }
 
@@ -11,9 +13,10 @@ namespace Domain
         {
             Number = number;
             String = s ?? "";
+            _string = $"{number}. {s}";
         }
 
-        public static Row From(string rowString)
+        public Row(string rowString)
         {
             if (rowString == null)
             {
@@ -27,10 +30,12 @@ namespace Domain
                 throw new ArgumentException($"Failed to parse row \"{rowString}\": invalid number part.");
             }
 
-            return new Row(number, stringPart);
+            Number = number;
+            String = stringPart;
+            _string = rowString;
         }
 
-        public override string ToString() => $"{Number}. {String}";
+        public override string ToString() => _string;
 
         #region IComparable
 

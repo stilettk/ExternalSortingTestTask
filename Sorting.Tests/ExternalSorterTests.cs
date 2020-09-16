@@ -38,6 +38,8 @@ namespace Sorting.Tests
                 yield return new[] {"1. b", "1. b", "1. a", "1. a"};
                 yield return new[] {"1. a", "1. a", "2. b"};
                 yield return new[] {"10. a", "1. a", "2. b"};
+                yield return new[] {"101. a", "99. a"};
+                yield return new[] {"3. Apple", "2. Apple", "2. Apple"};
                 yield return Enumerable.Range(0, 1000)
                     .Select(i => new Row(i, i.ToString()).ToString())
                     .ToArray();
@@ -66,7 +68,7 @@ namespace Sorting.Tests
             var sourcePath = GetFilePath();
             var generator = GetGenerator();
             await generator.GenerateAsync(sourcePath, 10 * 1024);
-            
+
             var destPath = GetFilePath();
             var sorter = GetExternalSorter(4096);
             await sorter.SortAsync(sourcePath, destPath);
@@ -82,13 +84,13 @@ namespace Sorting.Tests
             await sorter.SortAsync(sourcePath, destPath);
             return await File.ReadAllLinesAsync(destPath);
         }
-        
+
         private static IGenerator GetGenerator() => new ParallelGenerator(new SimpleGenerator(new RowGenerator()));
 
-        private static ISorter GetSimpleSorter() => new SimpleSorter(new DefaultSortingStrategy<string>());
+        private static ISorter GetSimpleSorter() => new SimpleSorter(new DefaultSortingStrategy<Row>());
 
         private static ISorter GetExternalSorter(int? chunkSizeBytes = 1) => new ExternalSorter(
-            new HPCMergeSortingStrategy(),
+            new HPCMergeSortingStrategy<Row>(),
             new ExternalSorterOptions {ChunkSizeBytes = chunkSizeBytes});
 
         private static string GetFilePath() => Path.Combine(DirectoryName, Guid.NewGuid().ToString());

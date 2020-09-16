@@ -63,7 +63,7 @@ namespace Sorting.Sorters.External
 
                     // await SaveChunk(currentChunk, chunkPath);
                     Logger.Debug($"Chunk processed in {sw.Elapsed}");
-                    chunkSaveTasks.AddLast(SaveChunk(currentChunk, chunkPath));
+                    chunkSaveTasks.AddLast(SortAndSaveChunk(currentChunk, chunkPath));
 
                     Logger.Debug("Created new chunk");
                     currentChunk = new Chunk();
@@ -83,15 +83,15 @@ namespace Sorting.Sorters.External
         private async Task MergeChunksAsync(string destPath, ICollection<string> chunkPaths)
         {
             var bufferSize = Math.Max(4096, _chunkSizeBytes / chunkPaths.Count);
-            await KWayMerge.ExecuteAsync(chunkPaths, destPath, Row.StringComparer, bufferSize);
+            await KWayMerge.ExecuteAsync(chunkPaths, destPath, bufferSize);
         }
 
-        private async Task SaveChunk(Chunk chunk, string chunkPath)
+        private async Task SortAndSaveChunk(Chunk chunk, string chunkPath)
         {
             var sw = Stopwatch.StartNew();
             Logger.Debug($"Saving chunk {chunkPath} ({chunk.Items.Count} items)...");
 
-            var sortedChunk = _sortingStrategy.Sort(chunk.Items).ToList();
+            var sortedChunk = await Task.Run(() => _sortingStrategy.Sort(chunk.Items).ToList());
             Logger.Debug($"Chunk {chunkPath} sorted in {sw.Elapsed}.");
 
             sw.Restart();

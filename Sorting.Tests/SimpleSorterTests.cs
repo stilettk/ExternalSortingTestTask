@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Domain;
 using NUnit.Framework;
 using Sorting.Sorters;
 using Sorting.SortingStrategy;
@@ -16,7 +17,7 @@ namespace Sorting.Tests
         {
             Directory.CreateDirectory(DirectoryName);
         }
-        
+
         [TearDown]
         public void TearDown()
         {
@@ -27,6 +28,8 @@ namespace Sorting.Tests
         [TestCase(new[] {"1. b", "1. b", "1. a", "1. a"}, new[] {"1. a", "1. a", "1. b", "1. b"})]
         [TestCase(new[] {"1. a", "1. a", "2. b"}, new[] {"1. a", "1. a", "2. b"})]
         [TestCase(new[] {"10. a", "1. a"}, new[] {"1. a", "10. a"})]
+        [TestCase(new[] {"101. a", "99. a"}, new[] {"99. a", "101. a"})]
+        [TestCase(new[] {"3. Apple", "2. Apple", "2. Apple"}, new[] {"2. Apple", "2. Apple", "3. Apple"})]
         [Test]
         public async Task WhenSort_ShouldSortCorrectly(string[] input, string[] expected)
         {
@@ -41,7 +44,7 @@ namespace Sorting.Tests
             CollectionAssert.AreEqual(result, expected);
         }
 
-        private static ISorter GetSorter() => new SimpleSorter(new DefaultSortingStrategy<string>());
+        private static ISorter GetSorter() => new SimpleSorter(new DefaultSortingStrategy<Row>());
 
         private static string GetFilePath() => Path.Combine(DirectoryName, Guid.NewGuid().ToString());
     }

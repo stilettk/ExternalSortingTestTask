@@ -15,20 +15,23 @@ namespace Domain
 
         public static Row From(string rowString)
         {
-            var parts = rowString.Split(". ");
-
-            if (parts.Length != 2 || !int.TryParse(parts[0], out var number))
+            if (rowString == null)
             {
-                throw new ArgumentException($"Failed to parse row \"{rowString}\"");
+                throw new ArgumentNullException(nameof(rowString));
             }
 
-            return new Row(number, parts[1]);
+            var (numberPart, stringPart) = RowStringParser.Parse(rowString);
+
+            if (!int.TryParse(numberPart, out var number))
+            {
+                throw new ArgumentException($"Failed to parse row \"{rowString}\": invalid number part.");
+            }
+
+            return new Row(number, stringPart);
         }
 
         public override string ToString() => $"{Number}. {String}";
 
-        public static RowStringComparer StringComparer => new RowStringComparer();
-        
         #region IComparable
 
         public int CompareTo(Row other)

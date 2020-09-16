@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using Domain;
@@ -6,20 +7,20 @@ using NLog;
 
 namespace Sorting.SortingStrategy
 {
-    public class HPCMergeSortingStrategy : ISortingStrategy<Row>
+    public class HPCMergeSortingStrategy<T> : ISortingStrategy<T>
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
         
-        public IEnumerable<Row> Sort(IEnumerable<Row> collection, IComparer<Row> comparer = null)
+        public IEnumerable<T> Sort(IEnumerable<T> collection, IComparer<T> comparer = null)
         {
             var sw = Stopwatch.StartNew();
             var list = collection.ToList();
-            Logger.Debug("Prepare: " + sw.Elapsed);
+            _logger.Debug("Prepare: " + sw.Elapsed);
             sw.Restart();
-            
+
             HPCsharp.ParallelAlgorithm.SortMergeInPlacePar(ref list, comparer);
-            Logger.Debug("Sort: " + sw.Elapsed);
-            
+            _logger.Debug("Sort: " + sw.Elapsed);
+
             return list;
         }
     }

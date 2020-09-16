@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Domain;
 
 namespace Sorting.Sorters.Algorithms.KWayMerge
 {
@@ -23,7 +24,11 @@ namespace Sorting.Sorters.Algorithms.KWayMerge
 
         public string Path { get; }
 
-        public async Task<string> ReadAsync() => await _reader.ReadLineAsync();
+        public async Task<Row?> ReadAsync()
+        {
+            var rowString = await _reader.ReadLineAsync();
+            return rowString != null ? Row.From(rowString) : (Row?) null;
+        }
 
         public void Dispose()
         {

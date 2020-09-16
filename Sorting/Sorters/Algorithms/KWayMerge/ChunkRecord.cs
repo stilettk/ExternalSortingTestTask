@@ -1,34 +1,30 @@
 ﻿using System.Collections.Generic;
+using Domain;
 
 namespace Sorting.Sorters.Algorithms.KWayMerge
 {
     public class ChunkRecord
     {
-        public sealed class Comparer : IComparer<ChunkRecord>
+        private sealed class ItemComparer : IComparer<ChunkRecord>
         {
-            private readonly IComparer<string> _itemComparer;
-
-            public Comparer(IComparer<string> itemComparer)
-            {
-                _itemComparer = itemComparer;
-            }
-
             public int Compare(ChunkRecord x, ChunkRecord y)
             {
                 if (ReferenceEquals(x, y)) return 0;
                 if (ReferenceEquals(null, y)) return 1;
                 if (ReferenceEquals(null, x)) return -1;
-                return _itemComparer.Compare(x.Item, y.Item);
+                return x.Item.CompareTo(y.Item);
             }
         }
 
-        public ChunkRecord(string item, string filePath)
+        public static IComparer<ChunkRecord> Comparer { get; } = new ItemComparer();
+
+        public ChunkRecord(Row item, string filePath)
         {
             Item = item;
             FilePath = filePath;
         }
 
-        public string Item { get; }
+        public Row Item { get; }
 
         public string FilePath { get; }
     }

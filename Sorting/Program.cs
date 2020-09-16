@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Domain;
 using NLog;
 using Sorting.Sorters;
 using Sorting.Sorters.External;
@@ -35,7 +36,7 @@ namespace Sorting
 
         private static ISorter GetSorter()
         {
-            var sortingStrategy = new HPCMergeSortingStrategy();
+            var sortingStrategy = new HPCMergeSortingStrategy<Row>();
             var sorter = new ExternalSorter(sortingStrategy);
             return sorter;
         }

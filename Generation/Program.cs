@@ -18,7 +18,7 @@ namespace Generation
             var sw = Stopwatch.StartNew();
 
             var generator = GetGenerator();
-            await generator.GenerateAsync("generated.txt", 10L * 1024 * 1024 * 1024);
+            await generator.GenerateAsync("generated.txt", 1L * 1024 * 1024 * 1024);
 
             Logger.Info($"Finished in {sw.Elapsed}.");
         }

@@ -45,8 +45,6 @@ namespace Sorting.Sorters.External
 
         private async Task<ICollection<string>> SortByChunks(string sourcePath)
         {
-            using var reader = File.OpenText(sourcePath);
-
             var chunkPaths = new LinkedList<string>();
             var chunkSaveTasks = new LinkedList<Task>();
             var currentChunk = new Chunk();
@@ -56,13 +54,9 @@ namespace Sorting.Sorters.External
             while (true)
             {
                 var currentLine = await fs.ReadLineAsync();
+                var endOfFileReached = currentLine == null;
 
-                if (currentLine != null)
-                {
-                    currentChunk.Add(Row.From(currentLine));
-                }
-
-                if (currentLine == null || currentChunk.Size >= _chunkSizeBytes)
+                if (currentChunk.Size >= _chunkSizeBytes || endOfFileReached)
                 {
                     var chunkPath = "chunk" + Guid.NewGuid();
                     chunkPaths.AddLast(chunkPath);
@@ -76,7 +70,9 @@ namespace Sorting.Sorters.External
                     sw.Restart();
                 }
 
-                if (currentLine == null) break;
+                if (endOfFileReached) break;
+
+                currentChunk.Add(Row.From(currentLine));
             }
 
             await Task.WhenAll(chunkSaveTasks);

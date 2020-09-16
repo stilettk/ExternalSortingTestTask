@@ -6,7 +6,7 @@ namespace Sorting.Sorters.External
 {
     public class Chunk
     {
-        private readonly LinkedList<Row> _items = new LinkedList<Row>();
+        private readonly List<Row> _items = new List<Row>();
         
         public IReadOnlyCollection<Row> Items => _items;
         
@@ -14,7 +14,7 @@ namespace Sorting.Sorters.External
 
         public void Add(Row row)
         {
-            _items.AddLast(row);
+            _items.Add(row);
             Size += GetRowSize(row);
         }
 
